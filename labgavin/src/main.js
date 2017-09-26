@@ -87,15 +87,14 @@ class Search extends React.Component {
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}  >
+      <form onSubmit={this.handleSubmit}>
         <input
           className={ this.state.failed === true ? 'board' : 'notRed'}
           type='text'
           name='board'
           placeholder='Board Name'
           value={this.state.board}
-          onChange={this.handleSearchChange}
-          />
+          onChange={this.handleSearchChange}/>
         <input
           className={ this.state.failed === true ? 'limit' : 'notRed'}
           type='number'
@@ -106,8 +105,7 @@ class Search extends React.Component {
           value={this.state.limit}
           onChange={this.handleRequestsChange}
           min='0'
-          max='100'
-          />
+          max='100'/>
           <br/>
         <input className="button" type="submit" />
       </form>
