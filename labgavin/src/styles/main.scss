@@ -29,6 +29,17 @@ body {
   }
 }
 
+ .board {
+  border-color: red;
+  border-style: solid;
+  border-width: 1px;
+}
+ .limit {
+  border-color: red;
+  border-style: solid;
+  border-width: 1px;
+}
+
 select {
   -webkit-appearance: none;
   text-align-last: center;

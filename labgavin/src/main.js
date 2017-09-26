@@ -1,159 +1,140 @@
-// import './styles/main.scss'
-
+import './styles/main.scss';
 import React from 'react';
 import ReactDom from 'react-dom';
 import superagent from 'superagent';
 
-
-class PokemonForm extends React.Component {
-  constructor(props) {
-    super(props);
-    // console.log(props) => props: {pokemonSelect: pokemonAppSelect, scott: 'hello world'}
-    this.state = {
-      searchFormBoard: '',
-      searchFormLimit: '',
-    };
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  componentDidMount() {
-    console.log('__FORM_PROPS__', this.props);
-    console.log('__FORM_STATE__', this.state);
-  }
-
-  handleSubmit(e) {
-    e.preventDefault();
-    this.props.pokemonSelect(this.state.searchFormBoard);
-  }
-
-  handleChange(e) {
-    this.setState({
-      searchFormBoard: e.target.value,
-      searchFormLimit: e.target.value,
-    });
-  }
-
-  render() {
-    return (
-      <form
-        className="pokemon-form"
-        onSubmit={this.handleSubmit}>
-
-        <input
-          type="text"
-          name="Board topic"
-          placeholder="which board to search"
-          value={this.state.searchFormBoard}
-          onChange={this.handleChange}/>
-        <input
-          type="text"
-          name="Number of results"
-          placeholder="how many pages"
-          value={this.state.searchFormLimit}
-          onChange={this.handleChange}/>
-      </form>
-    );
-  }
-}
-const API_URL = `http://www.reddit.com/r/${this.state.searchFormBoard}.json?limit=${this.state.searchFormLimit}`;
+const API_URL = 'http://www.reddit.com/r';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchFormBoard: '',
-      searchFormLimit: Math.floor(Math.random() * 100) + 1,
-      searchTopics: [],
-      topicLookup: {},
-      topicSelected: null,
-      topicSelectedError: null,
+      topics: [],
     };
-    this.pokemonAppSelect = this.pokemonAppSelect.bind(this);
+    this.topics = this.topics.bind(this);
   }
 
   componentDidUpdate() {
     console.log('__STATE__', this.state);
   }
 
-  componentDidMount() {
-    if(this.state.searchTopics) {
-      try {
-        let topicLookup = this.state.searchTopics[topicLookup];
-        this.setState({topicLookup});
-      } catch(e) {
-        console.error(e);
-      }
-    } else {
-      superagent.get(`${API_URL}`)
-      .then(res => {
-        let topicLookup = res.body.results.reduce((lookup, n) => {
-          lookup[n.name] = n.url;
-          return lookup;
-        }, {});
-
-        try {
-          this.setState({topicLookup});
-        } catch(e) {
-          console.error(e);
-        }
-      })
-      .catch(console.error);
-    }
+  topics(topics) {
+    this.setState({
+      topics: topics,
+    });
   }
-
-  pokemonAppSelect(name) {
-    if(!this.state.topicLookup[name]) {
-      this.setState({
-        topicSelected: null,
-        topicSelectedError: name,
-      });
-    } else {
-      console.log(this.state.topicLookup[name]);
-      superagent.get(this.state.topicLookup[name])
-      .then(res => {
-        this.setState({
-          topicSelected: res.body,
-          topicSelectedError: null,
-        });
-      })
-      .catch(console.error);
-    }
-  }
-
   render() {
     return (
-      <section className="application">
-        <h1>Pokemon Form Demo</h1>
-        <PokemonForm
-          pokemonSelect={this.pokemonAppSelect}
-          scott='hello world'/>
-
-        { this.state.topicSelected ?
-          // true: render the following
-          <div>
-            <section className="pokemon selected">
-              <h2>Selected: {this.state.topicSelected.name}</h2>
-              <img src={this.state.topicSelected.sprites.front_default} alt={this.state.topicSelected.name}/>
-            </section>
-            <section className="pokemon abilities">
-              <h3>Abilities</h3>
-              <ul>
-                {this.state.topicSelected.abilities.map((item, i) => {
-                  return <li key={i}>{item.topic.name}</li>;
-                })}
-              </ul>
-            </section>
-          </div> :
-          // false: render the following
-          <div>
-            <p>Please make a request to see pokemon data</p>
-          </div>
-        }
-      </section>
+      <div>
+        <h1>Wizard of Reddit</h1>
+        <Search topics = {this.topics} />
+        <SearchResultList topics = {this.state.topics} />
+      </div>
     );
   }
 }
+
+class Search extends React.Component {
+  constructor(props){
+    super(props);
+    this.state = {
+      board: '',
+      limit: '',
+      failed: null,
+    };
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleSearchChange = this.handleSearchChange.bind(this);
+    this.handleRequestsChange = this.handleRequestsChange.bind(this);
+  }
+  handleSearchChange(e) {
+    this.setState({board: e.target.value});
+  }
+
+  handleRequestsChange(e) {
+    this.setState({limit: e.target.value});
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+    superagent.get(`${API_URL}/${this.state.board}.json?limit=${this.state.limit}`)
+    .then((res) => {
+      console.log(res.body);
+      let topics = res.body.data.children.reduce((posts, post) => {
+        let newPost = {
+          title: post.data.title,
+          url: post.data.url,
+          ups: post.data.ups,
+        };
+
+        posts.push(newPost);
+
+        return posts;
+      }, []);
+      try {
+        this.props.topics(topics);
+      } catch (err) {
+        console.error(err);
+        this.setState({ failed: true });
+      }
+    })
+    .catch((err) => {
+      this.setState({
+        failed: true,
+      });
+    });
+  }
+
+
+  render() {
+    return (
+      <form onSubmit={this.handleSubmit}  >
+        <input
+          className={ this.state.failed === true ? 'board' : 'notRed'}
+          type='text'
+          name='board'
+          placeholder='Board Name'
+          value={this.state.board}
+          onChange={this.handleSearchChange}
+          />
+        <input
+          className={ this.state.failed === true ? 'limit' : 'notRed'}
+          type='number'
+          min='0'
+          max='100'
+          name='limit'
+          placeholder='Limit [0-100]'
+          value={this.state.limit}
+          onChange={this.handleRequestsChange}
+          min='0'
+          max='100'
+          />
+        <input type="submit" />
+      </form>
+    );
+  }
+}
+
+class SearchResultList extends React.Component {
+  constructor(props){
+    super(props);
+  }
+  render() {
+    return (
+      <div>
+        <ul>
+          {this.props.topics.map((item, i) => {
+            return (
+              <li key = {i}>
+                <a href = {item.url}><h2>{item.title}</h2></a>
+                <span><p>Upvotes: {item.ups}</p></span>
+              </li>
+            );
+          })}
+      </ul>
+    </div>
+    );
+  }
+}
+
 
 ReactDom.render(<App />, document.getElementById('root'));
