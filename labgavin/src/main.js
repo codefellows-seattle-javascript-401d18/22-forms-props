@@ -25,7 +25,7 @@ class App extends React.Component {
   }
   render() {
     return (
-      <div>
+      <div className="results">
         <h1>Wizard of Reddit</h1>
         <Search topics = {this.topics} />
         <SearchResultList topics = {this.state.topics} />
