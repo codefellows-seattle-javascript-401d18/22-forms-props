@@ -1,0 +1,40 @@
+$gutter-sm: 1.5vw;
+$gutter-lg: $gutter-sm * 2;
+
+* {
+  max-width: 100em;
+}
+
+body {
+  background-color: #01ABAA;
+  text-align: center;
+  background-size: cover;
+  background-position: fixed;
+  background-repeat: no-repeat;
+  max-width: 100%;
+}
+main {
+  background-color: #DFDCE3;
+  width: 960px;
+  margin: 0 auto;
+  margin-top: 50px;
+}
+
+.app-header {
+  background: #FEA680;
+
+  nav li {
+    list-style: none;
+    display: inline;
+    padding: $gutter-lg;
+  }
+}
+
+.application {
+  padding: $gutter-lg;
+  background: #FEDC3D;
+
+  pre {
+    max-width: 75em;
+  }
+}
