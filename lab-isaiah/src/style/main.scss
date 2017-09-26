@@ -1,0 +1,46 @@
+body {
+  background: navy;
+}
+
+.application {
+  pre {
+    color: lime;
+    border: 5px solid #ccc ;
+    border-radius: 10px;
+    text-align: center;
+    width: 70%;
+    height: 30em;
+    margin: auto;
+    background: black;
+  }
+
+  select {
+    -webkit-appearance: none;
+    text-align-last: center;
+    width: 20%;
+    margin-right: 3px;
+    margin-left: 30%;
+    align-self: center;
+  }
+
+  button, select, option {
+    width: 50%;
+    padding: 3px;
+    display: block;
+    margin: auto;
+    border: 2px solid green;
+    border-radius: 3px;
+    transition: 350ms;
+
+    &:hover {
+      cursor: pointer;
+      color: #7F00A1;
+      background: white;
+    }
+  }
+}
+
+.app-header {
+  background: #ccc;
+  text-align: center;
+}
