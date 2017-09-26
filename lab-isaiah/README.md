@@ -1,4 +1,4 @@
-![cf](https://i.imgur.com/7v5ASc8.png) 21: React Tooling - Cowsay Browser
+![cf](https://i.imgur.com/7v5ASc8.png) 22: Forms and Props
 ======
 
 # Lab21-Isaiah
@@ -13,7 +13,7 @@
   - [x] a `pre` tag that displays the app's state's content
 
 ### Documentation:
-The purpose of this app is to obtain a better understanding of how React can be used to render html elements to the DOM. This lab also introduced us to `webpack.js` as a bundler and brought back cowsay for some visual fun. 
+The purpose of this app is to obtain a better understanding of how React can be used to render html elements to the DOM. This lab also introduced us to `webpack.js` as a bundler and brought back cowsay for some visual fun.
 
 
 ##### The following is the assignment as presented:
