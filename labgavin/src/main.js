@@ -108,7 +108,8 @@ class Search extends React.Component {
           min='0'
           max='100'
           />
-        <input type="submit" />
+          <br/>
+        <input className="button" type="submit" />
       </form>
     );
   }
@@ -120,7 +121,7 @@ class SearchResultList extends React.Component {
   }
   render() {
     return (
-      <div>
+      <div className="results">
         <ul>
           {this.props.topics.map((item, i) => {
             return (

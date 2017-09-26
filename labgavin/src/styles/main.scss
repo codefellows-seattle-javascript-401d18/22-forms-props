@@ -10,6 +10,7 @@ $border-radius: 3px;
 body {
   background: $secondary;
   font-family: $font-primary;
+  text-align: center;
 
   .application {
     width: 100%;
@@ -40,13 +41,19 @@ body {
   border-width: 1px;
 }
 
+.results {
+  max-width: 75vw;
+  text-align: center;
+  // margin-left: 5vw;
+}
+
 select {
   -webkit-appearance: none;
   text-align-last: center;
 }
 
-button, select, option {
-  width: 100%;
+.button, select, option {
+  width: 25vw;
   padding: $gutter-sm;
   margin: ($gutter-sm / 2) 0;
   font-size: 2vw;
