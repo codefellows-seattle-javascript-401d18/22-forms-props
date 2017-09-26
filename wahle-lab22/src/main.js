@@ -1,147 +1,122 @@
-// import './styles/main.scss'
-
+// import './styles/maiimport './styles/main.scss'
 import React from 'react'
 import ReactDom from 'react-dom'
 import superagent from 'superagent'
 
-const API_URL = 'https://pokeapi.co/api/v2'
+// const API_URI = 'http://www.reddit.com/r/${searchFormBoard}.json?limit=${searchFormLimit}'
+const API_URI = 'http://www.reddit.com/r/'
 
-class PokemonForm extends React.Component {
+class SearchForm extends React.Component {
   constructor(props) {
-    super(props)
-    // console.log(props) => props: {pokemonSelect: pokemonAppSelect, scott: 'hello world'}
+    super(props);
     this.state = {
-      pokeName: '',
+      searchText: ''
     }
-
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
-  }
 
-  componentDidMount() {
-    console.log('__FORM_PROPS__', this.props)
-    console.log('__FORM_STATE__', this.state)
   }
-
-  handleSubmit(e) {
-    e.preventDefault()
-    this.props.pokemonSelect(this.state.pokeName)
-  }
-
   handleChange(e) {
-    this.setState({pokeName: e.target.value})
+    this.setState({
+      boardName: e.target.value
+    })
   }
-
+  handleSubmit(e) {
+    e.preventDefault();
+    this.props.handleSearch(this.state.searchText)
+  }
   render() {
     return (
-      <form
-        className="pokemon-form"
-        onSubmit={this.handleSubmit}>
-
+      <form onSubmit={this.handleSubmit}>
+        <label> {this.props.title} </label>
         <input
-          type="text"
-          name="pokemonName"
-          placeholder="search for a pokemon by name"
-          value={this.state.pokeName}
-          onChange={this.handleChange}/>
+          type='text'
+          onChange={this.handleChange}
+          value={this.state.searchText}
+          />
+        <button type='submit'>Search</button>
       </form>
     )
   }
 }
 
-class App extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      pokemonLookup: {},
-      pokemonSelected: null,
-      pokemonNameError: null,
-    }
-    this.pokemonAppSelect = this.pokemonAppSelect.bind(this)
-  }
-
-  componentDidUpdate() {
-    console.log('__STATE__', this.state)
-  }
-
-  componentDidMount() {
-    if(localStorage.pokemonLookup) {
-      try {
-        let pokemonLookup = JSON.parse(localStorage.pokemonLookup)
-        this.setState({pokemonLookup})
-      } catch(e) {
-        console.error(e)
-      }
-    } else {
-      superagent.get(`${API_URL}/pokemon/`)
-      .then(res => {
-        let pokemonLookup = res.body.results.reduce((lookup, n) => {
-          lookup[n.name] = n.url
-          return lookup
-        }, {})
-
-        try {
-          localStorage.pokemonLookup = JSON.stringify(pokemonLookup)
-          this.setState({pokemonLookup})
-        } catch(e) {
-          console.error(e)
-        }
-      })
-      .catch(console.error)
-    }
-  }
-
-  pokemonAppSelect(name) {
-    if(!this.state.pokemonLookup[name]) {
-      this.setState({
-        pokemonSelected: null,
-        pokemonNameError: name,
-      })
-    } else {
-      console.log(this.state.pokemonLookup[name])
-      superagent.get(this.state.pokemonLookup[name])
-      .then(res => {
-        this.setState({
-          pokemonSelected: res.body,
-          pokemonNameError: null,
-        })
-      })
-      .catch(console.error)
-    }
-  }
-
+class SearchResults extends React.Component {
   render() {
-    return (
-      <section className="application">
-        <h1>Pokemon Form Demo</h1>
-        <PokemonForm
-          pokemonSelect={this.pokemonAppSelect}
-          scott='hello world'/>
-
-        { this.state.pokemonSelected ?
-          // true: render the following
-          <div>
-            <section className="pokemon selected">
-              <h2>Selected: {this.state.pokemonSelected.name}</h2>
-              <img src={this.state.pokemonSelected.sprites.front_default} alt={this.state.pokemonSelected.name}/>
-            </section>
-            <section className="pokemon abilities">
-              <h3>Abilities</h3>
-              <ul>
-                {this.state.pokemonSelected.abilities.map((item, i) => {
-                  return <li key={i}>{item.ability.name}</li>
-                })}
-              </ul>
-            </section>
-          </div> :
-          // false: render the following
-          <div>
-            <p>Please make a request to see pokemon data</p>
-          </div>
-        }
-      </section>
-    )
+    return <p> Some cool string </p>
   }
 }
+
+
+//app -- manange application state AKA hold all
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+      this.state = {
+        results: null,
+        searchErrorMessage: null,
+      }
+      this.redditBoardFetch = this.redditBoardFetch.bind(this)
+    }
+
+componentDidUpdate() {
+  console.log('STATE ', this.state)
+}
+
+    redditBoardFetch(board) {
+      superagent.get(`${API_URI}/${board}.json`)
+      .then(res => {
+        this.setState({
+          results: res.body,
+          searchErrorMessage: null,
+        })
+      })
+      .catch(err => {
+        console.error(err);
+        this.setState({
+          results: null,
+          searchErrorMessage: `unable to find board ${board}`,
+        })
+      })
+    }
+    render() {
+      return (
+        <main>
+          <h1>Cool Beans</h1>
+          <SearchForm title= 'Reddit Board' handleSearch={this.redditBoardFetch}/>
+          <SearchResults />
+        </main>
+      )
+    }
+  }
+
+
+  //
+  //   this.searchReddit = this.searchReddit.bind(this);
+  // }
+// //searchform -- collect user input
+// class searchFormBoard extends React.Component {
+//   render() {
+//     return <p>Cool</p>
+//   }
+// }
+// //searchresultslist -- display reddit article
+// class searchresultslist extends React.Component {
+//   render() {
+//     return <p>Cool</p>
+//   }
+// }
+//
+//  class RedditForm extends React.Component {
+//    constructor(props) {
+//      super(props)
+//    }
+//    render() {
+//      return (
+//        <form>
+//
+//        </form>
+//      )
+//    }
+//  }
 
 ReactDom.render(<App />, document.getElementById('root'))
