@@ -10,7 +10,7 @@ class SearchForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      searchText: ''
+      searchText: '',
     }
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
@@ -18,7 +18,7 @@ class SearchForm extends React.Component {
   }
   handleChange(e) {
     this.setState({
-      boardName: e.target.value
+      searchText: e.target.value,
     })
   }
   handleSubmit(e) {
@@ -63,8 +63,9 @@ componentDidUpdate() {
 }
 
     redditBoardFetch(board) {
-      superagent.get(`${API_URI}/${board}.json`)
+      superagent.get(`${API_URI}${board}.json`)
       .then(res => {
+        console.log('request success', res)
         this.setState({
           results: res.body,
           searchErrorMessage: null,
@@ -81,8 +82,10 @@ componentDidUpdate() {
     render() {
       return (
         <main>
-          <h1>Cool Beans</h1>
-          <SearchForm title= 'Reddit Board' handleSearch={this.redditBoardFetch}/>
+          <h1>Some Cool Beans </h1>
+          <SearchForm
+          title= 'Reddit Board'
+          handleSearch={this.redditBoardFetch}/>
           <SearchResults />
         </main>
       )
