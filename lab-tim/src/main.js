@@ -16,7 +16,8 @@ class App extends React.Component {
     this.redditSearch = this.redditSearch.bind(this);
   }
 
-  fetchSubReddit(searchFormBoard, searchFormLimit) {
+  redditSearch(searchFormBoard, searchFormLimit) {
+    searchFormLimit = searchFormLimit - 2;
     superagent.get(`${API_URL}/${searchFormBoard}/.json?limit=${searchFormLimit}`)
       .then(res => {
         console.log(res);
@@ -33,10 +34,8 @@ class App extends React.Component {
   render() {
     return (
       <section className="application">
-        <SearchForm searchSubReddit={this.fetchSubReddit} />
-        //TODO
-        <something goes here />
-        <h1>Reddit Posts Thing</h1>
+        <SearchForm searchSubReddit={this.redditSearch} />
+        <SearchResultList results={this.state.topics} />
       </section>
     );
   }
@@ -47,7 +46,7 @@ class SearchForm extends React.Component {
     super(props);
     this.state = {
       board: '',
-      limit: 25,
+      limit: 10,
     };
 
     this.handleBoardChange = this.handleBoardChange.bind(this);
@@ -95,7 +94,7 @@ class SearchForm extends React.Component {
           name="limit"
           min="0"
           max="100"
-          placeholder="25"
+          placeholder="10"
           value={this.state.limit}
           onChange={this.handleLimitChange}/>
         <button type="submit">Search</button>
