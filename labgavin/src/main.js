@@ -15,6 +15,7 @@ class App extends React.Component {
   }
 
   componentDidUpdate() {
+    console.log('__FORM_PROPS__', this.props);
     console.log('__STATE__', this.state);
   }
 
