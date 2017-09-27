@@ -14,7 +14,6 @@ class SearchForm extends React.Component {
     }
     this.handleChange = this.handleChange.bind(this)
     this.handleSubmit = this.handleSubmit.bind(this)
-
   }
   handleChange(e) {
     this.setState({
@@ -25,6 +24,7 @@ class SearchForm extends React.Component {
     e.preventDefault();
     this.props.handleSearch(this.state.searchText)
   }
+  //returning a form with a submit button using handle functions
   render() {
     return (
       <form onSubmit={this.handleSubmit}>
@@ -40,11 +40,26 @@ class SearchForm extends React.Component {
   }
 }
 
+
+
+//should recieve an array of reddit article through props
 class SearchResults extends React.Component {
-  render() {
-    return <p> Some cool string </p>
+  constructor(props) {
+    super(props)
   }
-}
+  render(){
+    let articles = this.props.articles || [];
+    return (
+      <ul>
+        {articles.map((item, i) =>
+          <li key={i}>
+            <a href={item.data.url}> {item.data.title} </a>
+          </li>
+        )}
+      </ul>
+    );
+  };
+
 
 
 //app -- manange application state AKA hold all
@@ -61,13 +76,13 @@ class App extends React.Component {
 componentDidUpdate() {
   console.log('STATE ', this.state)
 }
-
+//this will make a request from user input and store the results objects in results var
     redditBoardFetch(board) {
       superagent.get(`${API_URI}${board}.json`)
       .then(res => {
         console.log('request success', res)
         this.setState({
-          results: res.body,
+          results: res.body.data.children,
           searchErrorMessage: null,
         })
       })
@@ -86,40 +101,9 @@ componentDidUpdate() {
           <SearchForm
           title= 'Reddit Board'
           handleSearch={this.redditBoardFetch}/>
-          <SearchResults />
+          <SearchResults articles={this.state.results}/>
         </main>
       )
     }
   }
-
-
-  //
-  //   this.searchReddit = this.searchReddit.bind(this);
-  // }
-// //searchform -- collect user input
-// class searchFormBoard extends React.Component {
-//   render() {
-//     return <p>Cool</p>
-//   }
-// }
-// //searchresultslist -- display reddit article
-// class searchresultslist extends React.Component {
-//   render() {
-//     return <p>Cool</p>
-//   }
-// }
-//
-//  class RedditForm extends React.Component {
-//    constructor(props) {
-//      super(props)
-//    }
-//    render() {
-//      return (
-//        <form>
-//
-//        </form>
-//      )
-//    }
-//  }
-
 ReactDom.render(<App />, document.getElementById('root'))
