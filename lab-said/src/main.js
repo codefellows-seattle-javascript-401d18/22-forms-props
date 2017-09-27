@@ -87,13 +87,11 @@ class App extends React.Component {
           topicSelect={this.redditTopicFetch}
           />
 
-
           {renderIf(this.state.results,
             <RedditArticlesList articles={this.state.results} />)}
 
           {renderIf(this.state.searchErrorMessage,
             <p> {this.state.searchErrorMessage} </p>)}
-
 
       </section>
     );
@@ -111,7 +109,7 @@ class RedditArticlesList extends React.Component {
       <ul>
         {articles.map((topic , i) =>
           <li key={i}>
-          <a href={topic.data.url}> {topic.data.title} </a>
+          <a href={topic.data.url}><h2> {topic.data.title}</h2> </a>
           <span>{topic.data.ups}</span>
           </li>
         )}
