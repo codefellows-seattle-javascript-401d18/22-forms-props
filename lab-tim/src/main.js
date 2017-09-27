@@ -11,37 +11,33 @@ class App extends React.Component {
     super(props);
     this.state = {
       topics: [],
-      redditError: null,
     };
 
     this.redditSearch = this.redditSearch.bind(this);
   }
 
-  // I have no idea what I am doing
-  redditSearch(searchFormBoard, searchFormLimit) {
+  fetchSubReddit(searchFormBoard, searchFormLimit) {
     superagent.get(`${API_URL}/${searchFormBoard}/.json?limit=${searchFormLimit}`)
       .then(res => {
         console.log(res);
-        // let redditTopics = res.body.results.reduce((lookup, n) => {
-        //   lookup[n.name] = n.url;
-        //   return lookup;
-        // }, {});
-        // console.log('I have no idea what I am doing');
-        // try {
-        //   console.log('I have no idea what I am doing');
-        // } catch(e) {
-        //   console.error(e);
-        // }
+        let sorted = res.body.data.children.sort((a,b) => b.data.ups - a.data.ups);
+        this.setState({topics: sorted});
       })
       .catch(console.error);
   }
 
+  componentDidUpdate() {
+    console.log('__STATE__', this.state);
+  }
+
   render() {
     return (
-      <section className="redditList">
+      <section className="application">
+        <SearchForm searchSubReddit={this.fetchSubReddit} />
+        <something goes here />
         <h1>Reddit Posts Thing</h1>
       </section>
-    )
+    );
   }
 }
 
@@ -49,8 +45,8 @@ class SearchForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      board: null,
-      limit: null,
+      board: '',
+      limit: 25,
     };
 
     this.handleBoardChange = this.handleBoardChange.bind(this);
@@ -60,7 +56,7 @@ class SearchForm extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    this.props.redditSearch(this.state.board, this.state.limit);
+    this.props.searchSubReddit(this.state.board, this.state.limit);
   }
 
   handleBoardChange(e) {
@@ -71,26 +67,38 @@ class SearchForm extends React.Component {
     this.setState({limit: e.target.value});
   }
 
+  componentDidMount() {
+    console.log('__FORM_PROPS__', this.props);
+    console.log('__FORM_STATE__', this.state);
+  }
+
+  componentDidUpdate() {
+    console.log('__FORM_PROPS__', this.props);
+    console.log('__FORM_STATE__', this.state);
+  }
+
   render() {
     return (
       <form
-        className="reddit-form"
+        className="search-form"
         onSubmit={this.handleSubmit}>
 
         <input
           type="text"
-          name="boardName"
+          name="board"
           placeholder="search for a board by name"
           value={this.state.board}
-          onChange={this.handleBoardChange}
-        />
+          onChange={this.handleBoardChange}/>
         <input
-          type="text"
-          name="boardLimit"
-          placeholder="limit number of boards"
+          type="number"
+          name="limit"
+          min="0"
+          max="100"
+          placeholder="25"
           value={this.state.limit}
-          onChange={this.handleLimitChange}
-        />
+          onChange={this.handleLimitChange}/>
+          //TODO
+        <button type="submit">Search</button>
       </form>
     );
   }
@@ -103,8 +111,24 @@ class SearchResultList extends React.Component {
 
   render() {
     return (
-      // I have no idea what I am doing
-      <section>list section</section>
+      <section className="result-list">
+        {this.props.results ?
+          //render if there are results
+      <ul>
+        {this.props.results.map((item, i) => {
+          return (
+            <li key={i}>
+              <a href={item.data.url}>
+                <h2>{item.data.title}</h2>
+              </a>
+              <span>Up-Votes: {item.data.ups}</span>
+            </li>);
+        })}
+      </ul> :
+          //render if there are no results
+          <h2>There are no results</h2>
+        }
+      </section>
     );
   }
 }
