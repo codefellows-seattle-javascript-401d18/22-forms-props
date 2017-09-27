@@ -4,7 +4,6 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import superagent from 'superagent';
 let API_URL = `http://www.reddit.com/r/`;
-let redditArticles = []
 
 class RedditForm extends React.Component {
   constructor(props) {
@@ -20,20 +19,33 @@ class RedditForm extends React.Component {
     console.log('__FORM_PROPS__', this.props);
     console.log('__FORM_STATE__', this.state);
   }
+
   handleSubmit(e) {
     e.preventDefault();
     API_URL = `${API_URL}${this.state.searchFormBoard}`;
     console.log(API_URL);
-    superagent.get(`${API_URL}.json?limit=20`)
+    superagent.get(`${API_URL}.json?limit=10`)
       .then(res => {
+        console.log(res.body.data.children);
         let boardLookup = res.body.data.children.map((lookup, n) =>{
-          redditArticles.push(res.body.data.children[n].data.title)
-          return lookup;
-        });    // this.props.boardSelect(this.state.searchFormBoard);
-        console.log(redditArticles)
-      });
-
+          var redditStuff = {};
+          redditStuff[n] = res.body.data.children[n].data;
+          // redditStuff[res.body.data.children[n].data.author] = res.body.data.children[n].data.title;
+          return redditStuff;
+          // lookup[n] = res.body.data.children[n].data.title;
+          // let author = res.body.data.children[n].data.author;
+        });
+        console.log(boardLookup);
+        try {
+          localStorage.boardLookup = JSON.stringify(boardLookup);
+          console.log(localStorage.boardLookup)
+          this.setState({boardLookup});
+        } catch(e) {
+          console.error(e);
+        }
+      })
   }
+
   handleChange(e) {
     this.setState({ searchFormBoard: e.target.value});
   }
@@ -95,15 +107,16 @@ class App extends React.Component {
   //       .catch(console.error);
   //   }
   // }
-  boardAppSelect(name){
-    if(!this.state.boardLookup[name]) {
+  boardAppSelect(){
+    console.log('boardAppSelect', this.state.boardLookup)
+    if(!this.state.boardLookup[title]) {
       this.setState({
         boardSelected: null,
         boardNameError: name,
       });
     } else {
-      console.log(this.state.boardLookup[name]);
-      superagent.get(this.state.boardLookup[name])
+      console.log(this.state.boardLookup[title]);
+      superagent.get(this.state.boardLookup[title])
         .then(res => {
           this.setState({
             boardSelected: res.body,
@@ -128,10 +141,10 @@ class App extends React.Component {
               <img src={this.state.boardSelected.sprites.front_default} alt={this.state.boardSelected.name}/>
             </section>
             <section className="reddit stories">
-              <h3>Abilities</h3>
+              <h3>Titles</h3>
               <ul>
-                {this.state.boardSelected.abilities.map((item, i) => {
-                  return <li key={i}>{item.ability.name}</li>;
+                {this.state.boardSelected.titles.map((item, i) => {
+                  return <li key={i}>{this.state.boardSelected.title}</li>;
                 })}
               </ul>
             </section>
