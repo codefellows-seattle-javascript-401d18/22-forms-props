@@ -2,7 +2,7 @@
 ======
 
 #### Project Description
-
+This project is for us to practice state! As well as passing data from parent component to child component through the use of props!
 
 #### Steps to remember:
 1. add eslintignore
@@ -12,6 +12,9 @@
 #### Objectives  
 * We will be able to manage controlled inputs
 * We will learn to pass data from parent components to child components through the use of `props`
+
+#### LOOK A DISTRACTION! AN ATTEMPT AT A PRETTY FLOWCHART! 
+![flowchart](/lab-maddy/lab22.001.png)
 
 #### Configuration  
 [x] `README.md`
@@ -35,7 +38,7 @@ App
 ```
 ###### App Component
 [x] should contain all of the **application state**
-[] should contain methods for modifying the application state
+[x] should contain methods for modifying the application state
 [x] the state should have a topics array for holding the results of the search
 
 ###### SearchForm Component
