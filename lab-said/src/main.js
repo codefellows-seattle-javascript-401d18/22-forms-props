@@ -4,6 +4,8 @@ import superagent from 'superagent';
 
 const API_URL = 'http://www.reddit.com/r';
 
+let renderIf = (test, component) => test ? component : undefined;
+
 class RedditForm extends React.Component {
   constructor(props) {
     super(props);
@@ -72,7 +74,7 @@ class App extends React.Component {
       console.error(err);
       this.setState({
         results: null,
-        searchErrorMessage: `Unable to find the reddit searchFormBoard ${searchFormBoard}.`,
+        searchErrorMessage: `Unable to find the reddit topic: ${searchFormBoard}`,
       });
     });
   }
@@ -83,15 +85,37 @@ class App extends React.Component {
         <h1>Reddi Topic Form </h1>
         <RedditForm
           topicSelect={this.redditTopicFetch}
-          scott='hello world'/>
+          />
 
-        { this.state.results.length ?
-              <h2>Selected: {this.state.results.length}</h2>
-          : <div>
-            <p>Please make a request to see reddit topic data</p>
-          </div>
-        }
+
+          {renderIf(this.state.results,
+            <RedditArticlesList articles={this.state.results} />)}
+
+          {renderIf(this.state.searchErrorMessage,
+            <p> {this.state.searchErrorMessage} </p>)}
+
+
       </section>
+    );
+  }
+}
+
+class RedditArticlesList extends React.Component {
+  constructor(props){
+    super(props);
+  }
+  render(){
+    let articles = this.props.articles || [];
+    console.log('articles', articles);
+    return (
+      <ul>
+        {articles.map((topic , i) =>
+          <li key={i}>
+          <a href={topic.data.url}> {topic.data.title} </a>
+          <span>{topic.data.ups}</span>
+          </li>
+        )}
+      </ul>
     );
   }
 }
