@@ -6,62 +6,6 @@ import superagent from 'superagent'
 // const API_URI = 'http://www.reddit.com/r/${searchFormBoard}.json?limit=${searchFormLimit}'
 const API_URI = 'http://www.reddit.com/r/'
 
-class SearchForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      searchText: '',
-    }
-    this.handleChange = this.handleChange.bind(this)
-    this.handleSubmit = this.handleSubmit.bind(this)
-  }
-  handleChange(e) {
-    this.setState({
-      searchText: e.target.value,
-    })
-  }
-  handleSubmit(e) {
-    e.preventDefault();
-    this.props.handleSearch(this.state.searchText)
-  }
-  //returning a form with a submit button using handle functions
-  render() {
-    return (
-      <form onSubmit={this.handleSubmit}>
-        <label> {this.props.title} </label>
-        <input
-          type='text'
-          onChange={this.handleChange}
-          value={this.state.searchText}
-          />
-        <button type='submit'>Search</button>
-      </form>
-    )
-  }
-}
-
-
-
-//should recieve an array of reddit article through props
-class SearchResults extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-  render(){
-    let articles = this.props.articles || [];
-    return (
-      <ul>
-        {articles.map((item, i) =>
-          <li key={i}>
-            <a href={item.data.url}> {item.data.title} </a>
-          </li>
-        )}
-      </ul>
-    );
-  };
-
-
-
 //app -- manange application state AKA hold all
 class App extends React.Component {
   constructor(props) {
@@ -106,4 +50,56 @@ componentDidUpdate() {
       )
     }
   }
+
+class SearchForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      searchText: '',
+    }
+    this.handleChange = this.handleChange.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
+  }
+  handleChange(e) {
+    this.setState({
+      searchText: e.target.value,
+    })
+  }
+  handleSubmit(e) {
+    e.preventDefault();
+    this.props.handleSearch(this.state.searchText)
+  }
+  //returning a form with a submit button using handle functions
+  render() {
+    return (
+      <form onSubmit={this.handleSubmit}>
+        <label> {this.props.title} </label>
+        <input
+          type='text'
+          onChange={this.handleChange}
+          value={this.state.searchText}
+          />
+        <button type='submit'>Search</button>
+      </form>
+    )
+  }
+}
+//should recieve an array of reddit article through props
+class SearchResults extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+  render(){
+    let articles = this.props.articles || [];
+    return (
+      <ul>
+        {articles.map((item, i) =>
+          <li key={i}>
+            <a href={item.data.url}> {item.data.title} </a>
+          </li>
+        )}
+      </ul>
+    );
+  };
+}
 ReactDom.render(<App />, document.getElementById('root'))
