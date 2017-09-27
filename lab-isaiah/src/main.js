@@ -2,14 +2,14 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import superagent from 'superagent';
 
-const API_URL = 'https://pokeapi.co/api/v2';
+const API_URL = 'https://www.reddit.com/r';
 
-class PokemonForm extends React.Component {
+class RedditForm extends React.Component {
   constructor(props) {
     super(props);
-    // console.log(props) => props: {pokemonSelect: pokemonAppSelect, isaiah: 'hello world'};
+    // console.log(props) => props: {redditSelect: redditAppSelect, isaiah: 'hello world'};
     this.state = {
-      pokeName: '',
+      redditName: '',
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -23,24 +23,24 @@ class PokemonForm extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    this.props.pokemonSelect(this.state.pokeName);
+    this.props.redditSelect(this.state.redditName);
   }
 
   handleChange(e) {
-    this.setState({pokeName: e.target.value});
+    this.setState({redditName: e.target.value});
   }
 
   render() {
     return (
       <form
-        className="pokemon-form"
+        className="reddit-form"
         onSubmit={this.handleSubmit}>
 
         <input
           type="text"
-          name="pokemonName"
-          placeholder="search for a pokemon by name"
-          value={this.state.pokename}
+          name="redditName"
+          placeholder="search for a reddit by name"
+          value={this.state.redditName}
           onChange={this.handleChange}/>
       </form>
     );
@@ -51,11 +51,11 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state= {
-      pokemonLookup: {},
-      pokemonSelected: null,
-      pokemonNameError: null,
+      redditLookup: {},
+      redditSelected: null,
+      redditNameError: null,
     };
-    this.pokemonAppSelect = this.pokemonAppSelect.bind(this);
+    this.redditAppSelect = this.redditAppSelect.bind(this);
   }
 
   componentDidUpdate() {
@@ -63,25 +63,31 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    if(localStorage.pokemonLookup) {
+    if(localStorage.redditLookup) {
       try {
-        let pokemonLookup = JSON.parse(localStorage.pokemonLookup);
-        this.setState({pokemonLookup});
+        let redditLookup = JSON.parse(localStorage.redditLookup);
+        this.setState({redditLookup});
       } catch(e) {
         console.error(e);
       }
     } else {
-      superagent.get(`${API_URL}/pokemon/`)
+      console.log('hi isaiah was here');
+      superagent.get(`${API_URL}/seattle.json?limit=10`)
         .then(res => {
-          console.log(res.body.results);
-          let pokemonLookup = res.body.results.reduce((lookup, n) => {
+          console.log(res.body);
+          console.log(res.body.data);
+          console.log(res.body.data.children);
+          console.log(res.body.data.children[0]);
+          console.log(res.body.data.children[0].data);
+
+          let redditLookup = res.body.data.children.map((lookup, n) => {
             lookup[n.name] = n.url;
             return lookup;
           }, {});
 
           try {
-            localStorage.pokemonLookup = JSON.stringify(pokemonLookup);
-            this.setState({pokemonLookup});
+            localStorage.redditLookup = JSON.stringify(redditLookup);
+            this.setState({redditLookup});
           } catch(e) {
             console.error(e);
           }
@@ -90,20 +96,23 @@ class App extends React.Component {
     }
   }
 
-  pokemonAppSelect(name) {
+  redditAppSelect(name) {
     // will allow us to pass the setState method to another Component
-    if(!this.state.pokemonLookup[name]) {
+    if(!this.state.redditLookup[name]) {
       this.setState({
-        pokemonSelected: null,
-        pokemonNameError: name,
+        redditSelected: null,
+        redditNameError: name,
       });
     } else {
-      console.log(this.state.pokemonLookup[name]);
-      superagent.get(this.state.pokemonLookup[name])
+      console.log(this.state.redditLookup[name]);
+
+      // Here is where I want to make the ajax request dynamic
+
+      superagent.get(this.state.redditLookup[name])
         .then(res => {
           this.setState({
-            pokemonSelected: res.body,
-            pokemonNameError: null,
+            redditSelected: res.body,
+            redditNameError: null,
           });
         })
         .catch(console.error);
@@ -113,30 +122,29 @@ class App extends React.Component {
   render() {
     return (
       <section className="application">
-        <h1>Pokemon Form Demo</h1>
-        <PokemonForm
-          pokemonSelect={this.pokemonAppSelect}
+        <h1>Reddit Form Demo</h1>
+        <RedditForm
+          redditSelect={this.redditAppSelect}
           isaiah='hello world'/>
 
-        { this.state.pokemonSelected ?
+        { this.state.redditSelected ?
           // true: render the following
           <div>
-            <section className="pokemon selected">
-              <h2>Selected: {this.state.pokemonSelected.name}</h2>
-              <img src={this.state.pokemonSelected.sprites.front_default} alt={this.state.pokemonSelected.name}/>
+            <section className="reddit selected">
+              <h2>Selected: {this.state.redditSelected.subreddit}</h2>
             </section>
-            <section className="pokemon abilities">
-              <h3>Abilities</h3>
+            <section className="reddit title">
+              <h3>Titles</h3>
               <ul>
-                {this.state.pokemonSelected.abilities.map((item, i) => {
-                  return <li key={i}>{item.ability.name}</li>;
+                {this.state.redditSelected.body.map((item, i) => {
+                  return <li key={i}>{item.title}</li>;
                 })}
               </ul>
             </section>
           </div> :
           // false: render the following
           <div>
-            <p>Please make a request to see pokemon data</p>
+            <p>Please make a request to see reddit data</p>
           </div>
         }
       </section>
