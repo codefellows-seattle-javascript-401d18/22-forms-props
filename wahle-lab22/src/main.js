@@ -41,9 +41,9 @@ componentDidUpdate() {
     render() {
       return (
         <main>
-          <h1>Some Cool Beans </h1>
+          <h1>Reddit Search App </h1>
           <SearchForm
-          title= 'Reddit Board'
+          boards= 'Reddit Board'
           handleSearch={this.redditBoardFetch}/>
           <SearchResults articles={this.state.results}/>
         </main>
@@ -73,7 +73,7 @@ class SearchForm extends React.Component {
   render() {
     return (
       <form onSubmit={this.handleSubmit}>
-        <label> {this.props.title} </label>
+        <label> {this.props.boards} </label>
         <input
           type='text'
           onChange={this.handleChange}
@@ -95,7 +95,7 @@ class SearchResults extends React.Component {
       <ul>
         {articles.map((item, i) =>
           <li key={i}>
-            <a href={item.data.url}> {item.data.title} </a>
+            <a href={item.data.url}> {item.data.boards} </a>
           </li>
         )}
       </ul>
