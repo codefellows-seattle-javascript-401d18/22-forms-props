@@ -1,35 +1,35 @@
-import './styles/main.scss'
+import './styles/main.scss';
 
-import React from 'react'
-import ReactDom from 'react-dom'
-import superagent from 'superagent'
+import React from 'react';
+import ReactDom from 'react-dom';
+import superagent from 'superagent';
 
-const API_URL = 'https://pokeapi.co/api/v2'
+const API_URL = 'https://pokeapi.co/api/v2';
 
 class PokemonForm extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     // console.log(props) => props: {pokemonSelect: pokemonAppSelect, scott: 'hello world'}
     this.state = {
       pokeName: '',
-    }
+    };
 
-    this.handleChange = this.handleChange.bind(this)
-    this.handleSubmit = this.handleSubmit.bind(this)
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentDidMount() {
-    console.log('__FORM_PROPS__', this.props)
-    console.log('__FORM_STATE__', this.state)
+    console.log('__FORM_PROPS__', this.props);
+    console.log('__FORM_STATE__', this.state);
   }
 
   handleSubmit(e) {
-    e.preventDefault()
-    this.props.pokemonSelect(this.state.pokeName)
+    e.preventDefault();
+    this.props.pokemonSelect(this.state.pokeName);
   }
 
   handleChange(e) {
-    this.setState({pokeName: e.target.value})
+    this.setState({pokeName: e.target.value});
   }
 
   render() {
@@ -49,43 +49,43 @@ class PokemonForm extends React.Component {
 
 class App extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       pokemonLookup: {},
       pokemonSelected: null,
       pokemonNameError: null,
-    }
-    this.pokemonAppSelect = this.pokemonAppSelect.bind(this)
+    };
+    this.pokemonAppSelect = this.pokemonAppSelect.bind(this);
   }
 
   componentDidUpdate() {
-    console.log('__STATE__', this.state)
+    console.log('__STATE__', this.state);
   }
 
   componentDidMount() {
     if(localStorage.pokemonLookup) {
       try {
-        let pokemonLookup = JSON.parse(localStorage.pokemonLookup)
-        this.setState({pokemonLookup})
+        let pokemonLookup = JSON.parse(localStorage.pokemonLookup);
+        this.setState({pokemonLookup});
       } catch(e) {
-        console.error(e)
+        console.error(e);
       }
     } else {
       superagent.get(`${API_URL}/pokemon/`)
       .then(res => {
         let pokemonLookup = res.body.results.reduce((lookup, n) => {
-          lookup[n.name] = n.url
-          return lookup
-        }, {})
+          lookup[n.name] = n.url;
+          return lookup;
+        }, {});
 
         try {
-          localStorage.pokemonLookup = JSON.stringify(pokemonLookup)
-          this.setState({pokemonLookup})
+          localStorage.pokemonLookup = JSON.stringify(pokemonLookup);
+          this.setState({pokemonLookup});
         } catch(e) {
-          console.error(e)
+          console.error(e);
         }
       })
-      .catch(console.error)
+      .catch(console.error);
     }
   }
 
@@ -94,17 +94,17 @@ class App extends React.Component {
       this.setState({
         pokemonSelected: null,
         pokemonNameError: name,
-      })
+      });
     } else {
-      console.log(this.state.pokemonLookup[name])
+      console.log(this.state.pokemonLookup[name]);
       superagent.get(this.state.pokemonLookup[name])
       .then(res => {
         this.setState({
           pokemonSelected: res.body,
           pokemonNameError: null,
-        })
+        });
       })
-      .catch(console.error)
+      .catch(console.error);
     }
   }
 
@@ -127,7 +127,7 @@ class App extends React.Component {
               <h3>Abilities</h3>
               <ul>
                 {this.state.pokemonSelected.abilities.map((item, i) => {
-                  return <li key={i}>{item.ability.name}</li>
+                  return <li key={i}>{item.ability.name}</li>;
                 })}
               </ul>
             </section>
@@ -138,8 +138,8 @@ class App extends React.Component {
           </div>
         }
       </section>
-    )
+    );
   }
 }
 
-ReactDom.render(<App />, document.getElementById('root'))
+ReactDom.render(<App />, document.getElementById('root'));
