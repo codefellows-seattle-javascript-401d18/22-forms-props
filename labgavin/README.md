@@ -1,1 +1,1 @@
-This is a basic Cowsay lorem Ipsum generator. This was built using React. 
+This is a basic Reddit scrapper built using React.
