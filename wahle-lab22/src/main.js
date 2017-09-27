@@ -1,7 +1,7 @@
-// import './styles/maiimport './styles/main.scss'
-import React from 'react'
-import ReactDom from 'react-dom'
-import superagent from 'superagent'
+import './style/main.scss';
+import React from 'react';
+import ReactDom from 'react-dom';
+import superagent from 'superagent';
 
 // const API_URI = 'http://www.reddit.com/r/${searchFormBoard}.json?limit=${searchFormLimit}'
 const API_URI = 'http://www.reddit.com/r/'
@@ -43,7 +43,7 @@ componentDidUpdate() {
         <main>
           <h1>Reddit Search App </h1>
           <SearchForm
-          boards= 'Reddit Board'
+          title= 'Reddit Board'
           handleSearch={this.redditBoardFetch}/>
           <SearchResults articles={this.state.results}/>
         </main>
@@ -73,7 +73,7 @@ class SearchForm extends React.Component {
   render() {
     return (
       <form onSubmit={this.handleSubmit}>
-        <label> {this.props.boards} </label>
+        <label> {this.props.title} </label>
         <input
           type='text'
           onChange={this.handleChange}
@@ -95,7 +95,7 @@ class SearchResults extends React.Component {
       <ul>
         {articles.map((item, i) =>
           <li key={i}>
-            <a href={item.data.url}> {item.data.boards} </a>
+            <a href={item.data.url}> {item.data.title} </a>
           </li>
         )}
       </ul>
