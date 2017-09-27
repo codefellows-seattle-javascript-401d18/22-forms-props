@@ -34,6 +34,7 @@ class App extends React.Component {
     return (
       <section className="application">
         <SearchForm searchSubReddit={this.fetchSubReddit} />
+        //TODO
         <something goes here />
         <h1>Reddit Posts Thing</h1>
       </section>
@@ -97,7 +98,6 @@ class SearchForm extends React.Component {
           placeholder="25"
           value={this.state.limit}
           onChange={this.handleLimitChange}/>
-          //TODO
         <button type="submit">Search</button>
       </form>
     );
