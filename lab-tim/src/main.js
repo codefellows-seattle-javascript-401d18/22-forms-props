@@ -10,15 +10,52 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      board: null,
-      limit: null,
       topics: [],
       redditError: null,
     };
+
+    this.redditSearch = this.redditSearch.bind(this);
+  }
+
+  // I have no idea what I am doing
+  redditSearch(searchFormBoard, searchFormLimit) {
+    superagent.get(`${API_URL}/${searchFormBoard}/.json?limit=${searchFormLimit}`)
+      .then(res => {
+        console.log(res);
+        // let redditTopics = res.body.results.reduce((lookup, n) => {
+        //   lookup[n.name] = n.url;
+        //   return lookup;
+        // }, {});
+        // console.log('I have no idea what I am doing');
+        // try {
+        //   console.log('I have no idea what I am doing');
+        // } catch(e) {
+        //   console.error(e);
+        // }
+      })
+      .catch(console.error);
+  }
+
+  render() {
+    return (
+      <section className="redditList">
+        <h1>Reddit Posts Thing</h1>
+      </section>
+    )
+  }
+}
+
+class SearchForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      board: null,
+      limit: null,
+    };
+
     this.handleBoardChange = this.handleBoardChange.bind(this);
     this.handleLimitChange = this.handleLimitChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.redditSearch = this.redditSearch.bind(this);
   }
 
   handleSubmit(e) {
@@ -32,34 +69,6 @@ class App extends React.Component {
 
   handleLimitChange(e) {
     this.setState({limit: e.target.value});
-  }
-
-  // I have no idea what I am doing
-  redditSearch(searchBoard, searchLimit) {
-    superagent.get(`${API_URL}/${searchBoard}/.json?limit=${searchLimit}`)
-      .then(res => {
-        let redditTopics = res.body.results.reduce((lookup, n) => {
-          lookup[n.name] = n.url;
-          return lookup;
-        }, {});
-        console.log('I have no idea what I am doing');
-        try {
-          console.log('I have no idea what I am doing');
-        } catch(e) {
-          console.error(e);
-        }
-      })
-      .catch(console.error);
-  }
-}
-
-class SearchForm extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      board: null,
-      limit: null,
-    };
   }
 
   render() {
@@ -95,9 +104,7 @@ class SearchResultList extends React.Component {
   render() {
     return (
       // I have no idea what I am doing
-      <section className="redditList">
-        <h1>Reddit Posts</h1>
-      </section>
+      <section>list section</section>
     );
   }
 }
