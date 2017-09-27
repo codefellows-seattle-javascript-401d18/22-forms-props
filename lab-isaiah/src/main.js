@@ -23,7 +23,7 @@ class RedditForm extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    this.props.redditSelect(this.state.redditName);
+    this.props.searchFormBoard(this.state.redditName);
   }
 
   handleChange(e) {
@@ -42,6 +42,7 @@ class RedditForm extends React.Component {
           placeholder="search for a reddit by name"
           value={this.state.redditName}
           onChange={this.handleChange}/>
+        <button type="submit">search</button>
       </form>
     );
   }
@@ -51,9 +52,9 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state= {
-      redditLookup: {},
-      redditSelected: null,
-      redditNameError: null,
+      redditTopics: [],
+      searchFormBoard: 'coffee',
+      searchFormLimit: 20,
     };
     this.redditAppSelect = this.redditAppSelect.bind(this);
   }
@@ -63,60 +64,40 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    if(localStorage.redditLookup) {
-      try {
-        let redditLookup = JSON.parse(localStorage.redditLookup);
-        this.setState({redditLookup});
-      } catch(e) {
-        console.error(e);
-      }
-    } else {
-      console.log('hi isaiah was here');
-      superagent.get(`${API_URL}/seattle.json?limit=10`)
-        .then(res => {
-          console.log(res.body);
-          console.log(res.body.data);
-          console.log(res.body.data.children);
-          console.log(res.body.data.children[0]);
-          console.log(res.body.data.children[0].data);
+    console.log('hi isaiah was here', this.state.searchFormBoard);
+    superagent.get(`${API_URL}/${this.state.searchFormBoard}.json?limit=${this.state.searchFormLimit}`)
+      .then(res => {
+        // console.log(res.body);
+        // console.log(res.body.data);
+        // console.log(res.body.data.children);
+        // console.log(res.body.data.children[0]);
+        // console.log(res.body.data.children.map((data) => {
+        //   return data.data.title;
+        // }));
 
-          let redditLookup = res.body.data.children.map((lookup, n) => {
-            lookup[n.name] = n.url;
-            return lookup;
-          }, {});
+        let redditTopics = res.body.data.children.map((data) => {
+          return data.data.title;
+        }, {});
+        console.log(redditTopics);
 
-          try {
-            localStorage.redditLookup = JSON.stringify(redditLookup);
-            this.setState({redditLookup});
-          } catch(e) {
-            console.error(e);
-          }
-        })
-        .catch(console.error);
-    }
+      })
+      .catch(console.error);
   }
 
-  redditAppSelect(name) {
-    // will allow us to pass the setState method to another Component
-    if(!this.state.redditLookup[name]) {
-      this.setState({
-        redditSelected: null,
-        redditNameError: name,
-      });
-    } else {
-      console.log(this.state.redditLookup[name]);
 
-      // Here is where I want to make the ajax request dynamic
+  redditAppSelect(topic) {
+    console.log(this.state.searchFormBoard);
 
-      superagent.get(this.state.redditLookup[name])
+    superagent.get(`${API_URL}/${this.state.searchFormBoard}.json`)
         .then(res => {
           this.setState({
-            redditSelected: res.body,
-            redditNameError: null,
+            redditTopics: res.body.data.children.map((data) => {
+              return data.data.title;
+            }),
+            searchFormLimit: 10,
           });
         })
         .catch(console.error);
-    }
   }
 
   render() {
@@ -124,21 +105,19 @@ class App extends React.Component {
       <section className="application">
         <h1>Reddit Form Demo</h1>
         <RedditForm
-          redditSelect={this.redditAppSelect}
+          redditName={this.redditAppSelect}
           isaiah='hello world'/>
 
-        { this.state.redditSelected ?
+        { this.state.searchFormBoard ?
           // true: render the following
           <div>
             <section className="reddit selected">
-              <h2>Selected: {this.state.redditSelected.subreddit}</h2>
+              <h2>Selected: {this.state.searchFormBoard}</h2>
             </section>
             <section className="reddit title">
               <h3>Titles</h3>
               <ul>
-                {this.state.redditSelected.body.map((item, i) => {
-                  return <li key={i}>{item.title}</li>;
-                })}
+                <li>{this.state.redditTopics}</li>
               </ul>
             </section>
           </div> :
