@@ -1,17 +1,18 @@
-// import './styles/main.scss'
-
+import './style/main.scss';
 import React from 'react';
 import ReactDom from 'react-dom';
 import superagent from 'superagent';
 
-const API_URL = 'https://pokeapi.co/api/v2';
+const API_URL = 'http://www.reddit.com/r'; //took away last /
+//${searchFormBoard}.json?';//limit=${searchFormLimit}
 
-class PokemonForm extends React.Component {
+class topicForm extends React.Component {
   constructor(props) {
     super(props);
-    // console.log(props) => props: {pokemonSelect: pokemonAppSelect, scott: 'hello world'}
     this.state = {
-      pokeName: '',
+      topicSearch: '',
+      // topics: [],
+      // topicError: null,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -25,25 +26,26 @@ class PokemonForm extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    this.props.pokemonSelect(this.state.pokeName);
+    this.props.topicSelect(this.state.topic);
   }
 
   handleChange(e) {
-    this.setState({pokeName: e.target.value});
+    this.setState({topicSearch: e.target.value});//changed from topic
   }
 
   render() {
     return (
       <form
-        className="pokemon-form"
+        className="topic-form"
         onSubmit={this.handleSubmit}>
 
         <input
           type="text"
-          name="pokemonName"
-          placeholder="search for a pokemon by name"
-          value={this.state.pokeName}
+          name="topicName"
+          placeholder="search for a topic by name"
+          value={this.state.topicSearch}
           onChange={this.handleChange}/>
+          <button type='submit'> Search for reddit topics </button>
       </form>
     );
   }
@@ -53,11 +55,12 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      pokemonLookup: {},
-      pokemonSelected: null,
-      pokemonNameError: null,
+      topicLookup: {},
+      results: [],
+      // topicSelected: null,
+      topicNameError: null,
     };
-    this.pokemonAppSelect = this.pokemonAppSelect.bind(this);
+    this.topicAppSelect = this.topicAppSelect.bind(this);
   }
 
   componentDidUpdate() {
@@ -65,24 +68,24 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    if(localStorage.pokemonLookup) {
+    if(localStorage.topicLookup) {
       try {
-        let pokemonLookup = JSON.parse(localStorage.pokemonLookup);
-        this.setState({pokemonLookup});
+        let topicLookup = JSON.parse(localStorage.topicLookup);
+        this.setState({topicLookup});
       } catch(e) {
         console.error(e);
       }
     } else {
-      superagent.get(`${API_URL}/pokemon/`)
+      superagent.get(`${API_URL}/somethinggggg/`)
       .then(res => {
-        let pokemonLookup = res.body.results.reduce((lookup, n) => {
+        let topicLookup = res.body.results.reduce((lookup, n) => {
           lookup[n.name] = n.url;
           return lookup;
         }, {});
 
         try {
-          localStorage.pokemonLookup = JSON.stringify(pokemonLookup);
-          this.setState({pokemonLookup});
+          localStorage.topicLookup = JSON.stringify(topicLookup);
+          this.setState({topicLookup});
         } catch(e) {
           console.error(e);
         }
@@ -91,55 +94,39 @@ class App extends React.Component {
     }
   }
 
-  pokemonAppSelect(name) {
-    if(!this.state.pokemonLookup[name]) {
+  topicAppSelect(searchFormBoard, searchFormLimit) { //said's help here
+    superagent.get(`${API_URL}/${searchFormBoard}.json?limit=${searchFormLimit}`)
+    .then(res => {
+      console.log('request success', res);
       this.setState({
-        pokemonSelected: null,
-        pokemonNameError: name,
+        results: res.body.data.children,
+        searchErrorMessage: null,
       });
-    } else {
-      console.log(this.state.pokemonLookup[name]);
-      superagent.get(this.state.pokemonLookup[name])
-      .then(res => {
-        this.setState({
-          pokemonSelected: res.body,
-          pokemonNameError: null,
-        });
-      })
-      .catch(console.error);
-    }
+    })
+    .catch(err => {
+      console.error(err);
+      this.setState({
+        results: null,
+        searchErrorMessage: `Unable to find the reddit searchFormBoard ${searchFormBoard}.`,
+      });
+    });
   }
 
   render() {
     return (
       <section className="application">
-        <h1>Pokemon Form Demo</h1>
-        <PokemonForm
-          pokemonSelect={this.pokemonAppSelect}
-          scott='hello world'/>
+        <h1>Reddit topic search</h1>
+        <topicForm
+        topicSelect={this.topicAppSelect}
+        scott='hello world'/>
 
-        { this.state.pokemonSelected ?
-          // true: render the following
-          <div>
-            <section className="pokemon selected">
-              <h2>Selected: {this.state.pokemonSelected.name}</h2>
-              <img src={this.state.pokemonSelected.sprites.front_default} alt={this.state.pokemonSelected.name}/>
-            </section>
-            <section className="pokemon abilities">
-              <h3>Abilities</h3>
-              <ul>
-                {this.state.pokemonSelected.abilities.map((item, i) => {
-                  return <li key={i}>{item.ability.name}</li>;
-                })}
-              </ul>
-            </section>
-          </div> :
-          // false: render the following
-          <div>
-            <p>Please make a request to see pokemon data</p>
-          </div>
-        }
-      </section>
+      { this.state.results.length ?
+            <h2>Selected: {this.state.results.length}</h2>
+        : <div>
+          <p>Please make a request to see reddit topic data</p>
+        </div>
+      }
+    </section>
     );
   }
 }
