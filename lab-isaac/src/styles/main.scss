@@ -1,0 +1,14 @@
+$primary: #aae2f9;
+$error: #DB0017;
+
+body {
+  background: $primary;
+
+  .application {
+    width: 100%;
+  }
+}
+
+#throwError {
+  border: 5px solid $error;
+}
