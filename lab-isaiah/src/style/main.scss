@@ -14,11 +14,7 @@ body {
     color: black;
   }
 
-  input {
-    margin-left: 30%;                         
-  }
-
-  button, select, option {
+  button {
     width: 20%;
     border: 2px solid green;
     border-radius: 3px;
@@ -32,7 +28,6 @@ body {
   }
 }
 
-.app-header {
-  background: #ccc;
-  text-align: center;
+.theone  {
+  margin-left: 30%; 
 }

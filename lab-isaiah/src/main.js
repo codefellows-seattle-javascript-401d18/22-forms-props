@@ -42,7 +42,7 @@ class SearchForm extends React.Component {
         className="search-form"
         onSubmit={this.handleSubmit}>
 
-        <input
+        <input className="theone"
           type="text"
           name="board"
           placeholder="search a reddit board"
