@@ -1,20 +1,21 @@
-import './styles/main.scss'
+import './styles/main.scss';
 
 import React from 'react';
 import ReactDom from 'react-dom';
 import superagent from 'superagent';
 
-const API_URL = 'http://www.reddit.com';
-//pulled from the long form web address
-//${searchFormBoard}.json?limit=${searchFormLimit}'
-class RedditForm extends React.Component {
+const API_URL = 'http://www.reddit.com/r';
+
+class SearchForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      redditName: '',
+      limit: 25,
+      board: '',
     };
 
-    this.handleChange = this.handleChange.bind(this);
+    this.handleBoardChange = this.handleBoardChange.bind(this);
+    this.handleLimitChange = this.handleLimitChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -25,25 +26,68 @@ class RedditForm extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    this.props.redditSelect(this.state.redditName);
+    this.props.searchSubReddit(this.state.board, this.state.limit);
   }
 
-  handleChange(e) {
-    this.setState({redditName: e.target.value});
+  handleBoardChange(e) {
+    this.setState({board: e.target.value});
+  }
+
+  handleLimitChange(e) {
+    this.setState({limit: e.target.value});
   }
 
   render() {
     return (
       <form
-        className="reddit-form"
+        className="search-form"
         onSubmit={this.handleSubmit}>
+
         <input
           type="text"
-          name="redditName"
-          placeholder="search the underbelly"
-          value={this.state.redditName}
-          onChange={this.handleChange}/>
+          name="board"
+          placeholder="search a reddit board"
+          value={this.state.board}
+          onChange={this.handleBoardChange}/>
+
+        <input
+          type="number"
+          name="limit"
+          min="0"
+          max="100"
+          placeholder="25"
+          value={this.state.limit}
+          onChange={this.handleLimitChange}/>
+
+        <button type="submit">search</button>
       </form>
+    );
+  }
+}
+
+class SearchResultList extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <section className="result-list">
+        {this.props.results ?
+          <ul>
+            {this.props.results.map((item, i) => {
+              return (
+                <li key={i}>
+                  <a href={item.data.url}>
+                    <h2>{item.data.title}</h2>
+                  </a>
+                  <span>Up-Votes: {item.data.ups}</span>
+                </li>);
+            })}
+          </ul> :
+          <h2>There are currently no results</h2>
+        }
+      </section>
     );
   }
 }
@@ -52,90 +96,30 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      redditLookup: {},
-      redditSelected: null,
-      redditNameError: null,
+      topics: [],
     };
-    this.redditAppSelect = this.redditAppSelect.bind(this);
+    this.fetchSubReddit = this.fetchSubReddit.bind(this);
   }
 
   componentDidUpdate() {
     console.log('__STATE__', this.state);
   }
 
-  componentDidMount() {
-    if(localStorage.redditLookup) {
-      try {
-        let redditLookup = JSON.parse(localStorage.redditLookup);
-        this.setState({redditLookup});
-      } catch(e) {
-        console.error(e);
-      }
-    } else {
-      superagent.get(`${API_URL}http://www.reddit.com`)
-        .then(res => {
-          let redditLookup = res.body.results.reduce((lookup, n) => {
-            lookup[n.name] = n.url;
-            return lookup;
-          }, {});
-
-          try {
-            localStorage.redditLookup = JSON.stringify(redditLookup);
-            this.setState({redditLookup});
-          } catch(e) {
-            console.error(e);
-          }
-        })
-        .catch(console.error);
-    }
-  }
-
-  redditAppSelect(name) {
-    if(!this.state.redditLookup[name]) {
-      this.setState({
-        redditSelected: null,
-        redditNameError: name,
+  fetchSubReddit(subreddit, limit) {
+    superagent.get(`${API_URL}/${subreddit}.json?limit=${limit}`)
+      .then(res => {
+        let sorted = res.body.data.children.sort((a, b) => b.data.ups - a.data.ups);
+        this.setState({topics: sorted});
       });
-    } else {
-      console.log(this.state.redditLookup[name]);
-      superagent.get(this.state.redditLookup[name])
-        .then(res => {
-          this.setState({
-            redditSelected: res.body,
-            redditNameError: null,
-          });
-        })
-        .catch(console.error);
-    }
   }
+
+
 
   render() {
     return (
       <section className="application">
-        <h1>Scrape the Depths of the Web...Reddit</h1>
-        <RedditForm
-          redditSelect={this.redditAppSelect}
-        />
-
-        { this.state.redditSelected ?
-          <div>
-            <section className="Reddit thread selected">
-              <h2>Selected: {this.state.redditSelected.name}</h2>
-              <img src={this.state.redditSelected.sprites.front_default} alt={this.state.redditSelected.name}/>
-            </section>
-            <section className="dufuque">
-              <h3>Abilities</h3>
-              <ul>
-                {this.state.redditSelected.abilities.map((item, i) => {
-                  return <li key={i}>{item.ability.name}</li>;
-                })}
-              </ul>
-            </section>
-          </div> :
-          <div>
-            <p>Please make a request to see reddit data</p>
-          </div>
-        }
+        <SearchForm searchSubReddit={this.fetchSubReddit}/>
+        <SearchResultList results={this.state.topics}/>
       </section>
     );
   }
