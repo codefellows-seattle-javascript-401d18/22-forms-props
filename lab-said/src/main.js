@@ -12,9 +12,11 @@ class RedditForm extends React.Component {
 
     this.state = {
       topicSearch: '',
+      limit:25,
     };
 
     this.handleChange = this.handleChange.bind(this);
+    this.handleLimitChange = this.handleLimitChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -25,11 +27,15 @@ class RedditForm extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    this.props.topicSelect(this.state.topicSearch);
+    this.props.topicSelect(this.state.topicSearch, this.state.limit);
   }
 
   handleChange(e) {
     this.setState({topicSearch: e.target.value});
+  }
+
+  handleLimitChange(e) {
+    this.setState({limit: e.target.value});
   }
 
   render() {
@@ -44,6 +50,15 @@ class RedditForm extends React.Component {
           placeholder="search reddit by topic"
           value={this.state.topicSearch}
           onChange={this.handleChange}/>
+
+          <input
+          type="number"
+          name="limit"
+          min="0"
+          max="100"
+          placeholder="25"
+          value={this.state.limit}
+          onChange={this.handleLimitChange}/>
         <button type='submit'> Search reddit </button>
       </form>
     );
@@ -110,7 +125,7 @@ class RedditArticlesList extends React.Component {
         {articles.map((topic , i) =>
           <li key={i}>
           <a href={topic.data.url}><h2> {topic.data.title}</h2> </a>
-          <span>{topic.data.ups}</span>
+          <span>Up-Votes: {topic.data.ups}</span>
           </li>
         )}
       </ul>
