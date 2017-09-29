@@ -32,30 +32,59 @@ class SearchForm extends React.Component {
   }
 
   render() {
-    return(
-      <form
-        id="search-form"
-        onSubmit={this.handleSubmit}>
+    if(this.props.callError === true) {
+      return(
+        <form
+          id="search-form"
+          className="search-form-error"
+          onSubmit={this.handleSubmit}>
 
-        <input
-          type="text"
-          name="board"
-          placeholder="search a reddit board"
-          value={this.state.board}
-          onChange={this.handleBoardChange}/>
+          <input
+            type="text"
+            name="board"
+            placeholder="search a reddit board"
+            value={this.state.board}
+            onChange={this.handleBoardChange}/>
 
-        <input
-          type="number"
-          name="limit"
-          min="0"
-          max="100"
-          placeholder="25"
-          value={this.state.limit}
-          onChange={this.handleLimitChange}/>
+          <input
+            type="number"
+            name="limit"
+            min="0"
+            max="100"
+            placeholder="25"
+            value={this.state.limit}
+            onChange={this.handleLimitChange}/>
 
-        <button type="submit">search</button>
-      </form>
-    );
+          <button type="submit">search</button>
+        </form>
+      );
+    } else if(this.props.callError === false) {
+      return(
+        <form
+          id="search-form"
+          className="search-form-class"
+          onSubmit={this.handleSubmit}>
+
+          <input
+            type="text"
+            name="board"
+            placeholder="search a reddit board"
+            value={this.state.board}
+            onChange={this.handleBoardChange}/>
+
+          <input
+            type="number"
+            name="limit"
+            min="0"
+            max="100"
+            placeholder="25"
+            value={this.state.limit}
+            onChange={this.handleLimitChange}/>
+
+          <button type="submit">search</button>
+        </form>
+      );
+    }
   }
 }
 
@@ -97,6 +126,7 @@ class App extends React.Component {
   }
 
   makeAnApiCall(limit, board) {
+    this.setState({callError: false});
     superagent.get(`${API_URL}/${limit}.json?limit=${board}`)
       .then(res => {
         let sorted = res.body.data.children.sort((a, b) => b.data.ups - a.data.ups);
@@ -105,7 +135,7 @@ class App extends React.Component {
       .catch(err => {
         console.error(err);
         this.setState({callError: true});
-        console.log(this.state);
+        this.setState({topicsArray: []});
       });
   }
 

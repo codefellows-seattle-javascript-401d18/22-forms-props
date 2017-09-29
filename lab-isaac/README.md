@@ -1,8 +1,8 @@
-# Lab 21 - Cowsay Ipsum
+# Lab 22 - Reddit Scraper
 
 ## About
 
-This application is a basic React App that generates Lorem Ipsum via a the Cowsay plugin.
+This application is a React App that sends an HTTP GET request to Reddit API and scrapes the response to populate the data in the app.  This application utilizes "superagent" package to make the API calls.
 
 ## Installation
 
