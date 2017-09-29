@@ -1,5 +1,5 @@
 {
-  "name": "01-webpack-react-tooling",
+  "name": "Reddit Scraper",
   "version": "1.0.0",
   "description": "intro to react and webpack lab",
   "main": "webpack.config.js",
