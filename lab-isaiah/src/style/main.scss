@@ -1,0 +1,33 @@
+body {
+  background: cornflowerblue;
+}
+
+.application {
+
+
+  li {
+    background: white;
+    color: black;
+  }
+
+  h2 {
+    color: black;
+  }
+
+  button {
+    width: 20%;
+    border: 2px solid green;
+    border-radius: 3px;
+    transition: 350ms;
+
+    &:hover {
+      cursor: pointer;
+      color: #7F00A1;
+      background: white;
+    }
+  }
+}
+
+.theone  {
+  margin-left: 30%; 
+}
