@@ -8,11 +8,12 @@ let API_URL = `http://www.reddit.com/r/`;
 class RedditForm extends React.Component {
   constructor(props) {
     super(props);
-    console.log('props', props);
     this.state = {
-      searchFormBoard: '',
+      limit: 10,
+      board: '',
     };
-    this.handleChange = this.handleChange.bind(this);
+    this.handleBoard = this.handleBoard.bind(this);
+    this.handleLimit = this.handleLimit.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
   componentDidMount() {
@@ -20,35 +21,19 @@ class RedditForm extends React.Component {
     console.log('__FORM_STATE__', this.state);
   }
 
-  handleSubmit(e) {
-    e.preventDefault();
-    API_URL = `${API_URL}${this.state.searchFormBoard}`;
-    console.log(API_URL);
-    superagent.get(`${API_URL}.json?limit=10`)
-      .then(res => {
-        console.log(res.body.data.children);
-        let boardLookup = res.body.data.children.map((lookup, n) =>{
-          var redditStuff = {};
-          redditStuff[n] = res.body.data.children[n].data;
-          // redditStuff[res.body.data.children[n].data.author] = res.body.data.children[n].data.title;
-          return redditStuff;
-          // lookup[n] = res.body.data.children[n].data.title;
-          // let author = res.body.data.children[n].data.author;
-        });
-        console.log(boardLookup);
-        try {
-          localStorage.boardLookup = JSON.stringify(boardLookup);
-          console.log(localStorage.boardLookup)
-          this.setState({boardLookup});
-        } catch(e) {
-          console.error(e);
-        }
-      })
+  handleBoard(e) {
+    this.setState({ board: e.target.value});
   }
 
-  handleChange(e) {
-    this.setState({ searchFormBoard: e.target.value});
+  handleLimit(e){
+    this.setState({limit: e.target.value});
   }
+
+  handleSubmit(e){
+    e.preventDefault();
+    this.props.searchReddit(this.state.board, this.state.limit);
+  }
+
   render() {
     return (
       <form
@@ -57,11 +42,50 @@ class RedditForm extends React.Component {
 
         <input
           type="text"
-          name="boardName"
+          name="board"
           placeholder="search"
-          value={this.state.searchFormBoard}
-          onChange={this.handleChange} />
+          value={this.state.board}
+          onChange={this.handleBoard} />
+
+        <input
+          type="number"
+          name="limit"
+          min="0"
+          max="100"
+          placeholder="25"
+          value={this.state.limit}
+          onChange={this.handleLimit}/>
+
+        <button type="submit">search</button>
+
       </form>
+    );
+  }
+}
+
+class Results extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render(){
+    return (
+      <section className="result-list">
+        {this.props.results ?
+          <ul>
+            {this.props.results.map((item, i) => {
+              return (
+                <li key={i}>
+                  <a href={item.data.url}>
+                    <h2>{item.data.title}</h2>
+                  </a>
+                  <span>Up-Votes: {item.data.ups}</span>
+                </li>
+              );
+            })}
+          </ul> :
+          <h2>There are no results</h2>}
+      </section>
     );
   }
 }
@@ -70,89 +94,28 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      boardLookup: {},
-      boardSelected: null,
-      boardNameError: null,
+      topics: [],
     };
     this.boardAppSelect = this.boardAppSelect.bind(this);
   }
+
   componentDidUpdate() {
     console.log('__STATE__', this.state);
   }
-  // componentDidMount() {
-  //   if(localStorage.boardLookup) {
-  //     try {
-  //       let boardLookup = JSON.parse(localStorage.boardLookup);
-  //       this.setState({boardLookup});
-  //     } catch(e) {
-  //       console.error(e);
-  //     }
-  //   } else {
-  //     superagent.get(`${API_URL}.json?limit=20`)
-  //       .then(res => {
-  //         console.log('body', res.body.data);
-  //         console.log(res.body.data.children)
-  //         let boardLookup = res.body.data.children.reduce((lookup, n) =>{
-  //           console.log(n[0])
-  //           lookup[n.name] = n.subreddit;
-  //           return lookup;
-  //         }, {});
-  //         try{
-  //           localStorage.boardLookup = JSON.stringify(boardLookup);
-  //           this.setState({boardLookup});
-  //         } catch(e) {
-  //           console.error(e);
-  //         }
-  //       })
-  //       .catch(console.error);
-  //   }
-  // }
-  boardAppSelect(){
-    console.log('boardAppSelect', this.state.boardLookup)
-    if(!this.state.boardLookup[title]) {
-      this.setState({
-        boardSelected: null,
-        boardNameError: name,
+
+  boardAppSelect(subreddit, limit){
+    superagent.get(`${API_URL}${subreddit}.json?limit=${limit}`)
+      .then(res => {
+        let sorted = res.body.data.children.sort((a, b) => b.data.ups - a.data.ups);
+        this.setState({topics: sorted});
       });
-    } else {
-      console.log(this.state.boardLookup[title]);
-      superagent.get(this.state.boardLookup[title])
-        .then(res => {
-          this.setState({
-            boardSelected: res.body,
-            boardNameError: null,
-          });
-        })
-        .catch(console.error);
-    }
   }
 
   render() {
     return (
       <section className="application">
-        <h1>Reddit Search</h1>
-        <RedditForm
-          boardSelect={this.boardAppSelect}
-          scott='hello world'/>
-        { this.state.boardSelected ?
-          <div>
-            <section className="reddit selected">
-              <h2>Selected: {this.state.boardSelected.name}</h2>
-              <img src={this.state.boardSelected.sprites.front_default} alt={this.state.boardSelected.name}/>
-            </section>
-            <section className="reddit stories">
-              <h3>Titles</h3>
-              <ul>
-                {this.state.boardSelected.titles.map((item, i) => {
-                  return <li key={i}>{this.state.boardSelected.title}</li>;
-                })}
-              </ul>
-            </section>
-          </div> :
-          <div>
-            <p>please ask for reddit</p>
-          </div>
-        }
+        <RedditForm searchReddit={this.boardAppSelect}/>
+        <Results results={this.state.topics}/>
       </section>
     );
   }
