@@ -8,6 +8,7 @@ This project is for us to practice state! As well as passing data from parent co
 1. add eslintignore
 2. add gitignore
 3. npm i
+4. npm run watch
 
 #### Objectives  
 * We will be able to manage controlled inputs
@@ -55,7 +56,10 @@ App
 * [] should inherit all search results through `props`
   [] this component does not need to have its own state!
 * [] if there are topics listed in the application state, it should display an unordered list of topics
-* [] each list item should contain the following
+* [] each list item should contain the following (line 73 in code review under Class SearchResultList extends...within its render)
   * [] an `<a>` tag with an `href` that points to the `topic.url`
   * [] inside the `<a>` tag, include an `<h2>` tag with the `topic.title`
   * [] after the `<a>` tag (*not nested as a child*), include a `<span>` tag with the number of `topic.ups` (topic upvotes)
+
+#### Collaborators
+Michelle, Gavin
