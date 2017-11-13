@@ -116,8 +116,6 @@ class App extends React.Component {
     });
   }
 
-
-
   render() {
     return (
       <section className="application">
