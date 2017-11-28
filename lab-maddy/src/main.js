@@ -1,21 +1,22 @@
-import './style/main.scss';
+// import './styles/main.scss'
+
 import React from 'react';
 import ReactDom from 'react-dom';
 import superagent from 'superagent';
 
-const API_URL = 'http://www.reddit.com/r'; //took away last /
-//${searchFormBoard}.json?';//limit=${searchFormLimit}
+const API_URL = 'http://www.reddit.com/r';
 
-class topicForm extends React.Component {
+
+class SearchForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      topicSearch: '',
-      // topics: [],
-      // topicError: null,
+      limit: 25,
+      board: '',
     };
 
-    this.handleChange = this.handleChange.bind(this);
+    this.handleBoardChange = this.handleBoardChange.bind(this);
+    this.handleLimitChange = this.handleLimitChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
@@ -26,27 +27,70 @@ class topicForm extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    this.props.topicSelect(this.state.topic);
+    this.props.searchSubReddit(this.state.board, this.state.limit);
   }
 
-  handleChange(e) {
-    this.setState({topicSearch: e.target.value});//changed from topic
+  handleBoardChange(e) {
+    this.setState({board: e.target.value});
+  }
+
+  handleLimitChange(e) {
+    this.setState({limit: e.target.value});
   }
 
   render() {
     return (
       <form
-        className="topic-form"
+        className="search-form"
         onSubmit={this.handleSubmit}>
 
         <input
           type="text"
-          name="topicName"
-          placeholder="search for a topic by name"
-          value={this.state.topicSearch}
-          onChange={this.handleChange}/>
-          <button type='submit'> Search for reddit topics </button>
+          name="board"
+          placeholder="search a reddit board"
+          value={this.state.board}
+          onChange={this.handleBoardChange}/>
+
+        <input
+          type="number"
+          name="limit"
+          min="0"
+          max="100"
+          placeholder="25"
+          value={this.state.limit}
+          onChange={this.handleLimitChange}/>
+
+        <button type="submit">search</button>
       </form>
+    );
+  }
+}
+
+class SearchResultList extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return (
+      <section className="result-list">
+        {this.props.results ?
+        // render if there are results
+          <ul>
+            {this.props.results.map((item, i) => {
+              return (
+                <li key={i}>
+                  <a href={item.data.url}>
+                    <h2>{item.data.title}</h2>
+                  </a>
+                  <span>Up-Votes: {item.data.ups}</span>
+                </li>);
+              })}
+          </ul> :
+          // render if there are NO results
+          <h2>There are currently no results</h2>
+        }
+      </section>
     );
   }
 }
@@ -55,78 +99,29 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      topicLookup: {},
-      results: [],
-      // topicSelected: null,
-      topicNameError: null,
+      topics: [],
     };
-    this.topicAppSelect = this.topicAppSelect.bind(this);
+    this.fetchSubReddit = this.fetchSubReddit.bind(this);
   }
 
   componentDidUpdate() {
     console.log('__STATE__', this.state);
   }
 
-  componentDidMount() {
-    if(localStorage.topicLookup) {
-      try {
-        let topicLookup = JSON.parse(localStorage.topicLookup);
-        this.setState({topicLookup});
-      } catch(e) {
-        console.error(e);
-      }
-    } else {
-      superagent.get(`${API_URL}/somethinggggg/`)
-      .then(res => {
-        let topicLookup = res.body.results.reduce((lookup, n) => {
-          lookup[n.name] = n.url;
-          return lookup;
-        }, {});
-
-        try {
-          localStorage.topicLookup = JSON.stringify(topicLookup);
-          this.setState({topicLookup});
-        } catch(e) {
-          console.error(e);
-        }
-      })
-      .catch(console.error);
-    }
-  }
-
-  topicAppSelect(searchFormBoard, searchFormLimit) { //said's help here
-    superagent.get(`${API_URL}/${searchFormBoard}.json?limit=${searchFormLimit}`)
+  fetchSubReddit(subreddit, limit) {
+    superagent.get(`${API_URL}/${subreddit}.json?limit=${limit}`)
     .then(res => {
-      console.log('request success', res);
-      this.setState({
-        results: res.body.data.children,
-        searchErrorMessage: null,
-      });
-    })
-    .catch(err => {
-      console.error(err);
-      this.setState({
-        results: null,
-        searchErrorMessage: `Unable to find the reddit searchFormBoard ${searchFormBoard}.`,
-      });
+      let sorted = res.body.data.children.sort((a, b) => b.data.ups - a.data.ups);
+      this.setState({topics: sorted});
     });
   }
 
   render() {
     return (
       <section className="application">
-        <h1>Reddit topic search</h1>
-        <topicForm
-        topicSelect={this.topicAppSelect}
-        scott='hello world'/>
-
-      { this.state.results.length ?
-            <h2>Selected: {this.state.results.length}</h2>
-        : <div>
-          <p>Please make a request to see reddit topic data</p>
-        </div>
-      }
-    </section>
+       <SearchForm searchSubReddit={this.fetchSubReddit}/>
+       <SearchResultList results={this.state.topics}/>
+      </section>
     );
   }
 }
