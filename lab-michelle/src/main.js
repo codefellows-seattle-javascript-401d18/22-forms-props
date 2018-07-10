@@ -3,36 +3,89 @@ import ReactDom from 'react-dom';
 import superagent from 'superagent';
 
 const API_URL =  `http://www.reddit.com/r/`;
-//${searchFormBoard}.json?limit=${searchFormLimit}
 
 class SearchForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      topic: '',
+      limit: 25,
+      board: '',
     };
 
+    this.handleBoardChange = this.handleBoardChange.bind(this);
+    this.handleLimitChange = this.handleLimitChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleChange = this.handleChange.bind(this);
+  }
+
+  componentDidMount() {
+    console.log('FORMPROPS', this.props);
+    console.log('FORMSTATE', this.state);
   }
 
   handleSubmit(e) {
     e.preventDefault();
-    this.props.topicSelect(this.state.topic); //this name might be wacky
+    this.props.searchSubReddit(this.state.board, this.state.limit);
+  }
+
+  handleLimitChange(e) {
+    this.setState({limit: e.target.value});
+  }
+
+  handleBoardChange(e) {
+    this.setState({board: e.target.value});
   }
 
   render() {
     return (
-      <form className="searchForm"
-      onSubmit = {this.handleSubmit}>
+      <form
+        className="search-fform"
+        onSubmit = {this.handleSubmit}>
+
       <input
         type="text"
+        name="board"
         placeholder="Type in a topic"
-        value = {this.state.topic}
-        onChange = {this.handleChange}
-        />
-        <button type="submit">Clicky clicky</button>
+        value = {this.state.board}
+        onChange = {this.handleBoardChange}/>
+
+      <input
+        type="number"
+        name="limit"
+        min="0"
+        max="100"
+        placeholder="25"
+        value={this.state.limit}
+        onChange = {this.handleLimitChange}/>
+
+        <button type="submit">Search!</button>
         </form>
+    );
+  }
+}
+
+class SearchResultsList extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    return(
+      <section className="result-list">
+    {this.props.results ?
+      <ul>
+      {this.props.results.map((item, i) => {
+        return (
+          <li key={i}>
+            <a href={item.data.url}>
+              <h2>{item.data.title}</h2>
+            </a>
+          <span>Upvotes: {item.data.ups}</span>
+        </li>);
+      })}
+      </ul> :
+      <h2> No results </h2>
+    }
+    </section>
     );
   }
 }
@@ -41,50 +94,31 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      topicLookup: [], //this will be search results list?
-      topicSelected: {}, //we pick one in there to show & that's the one that we put into text input in Search Form
-      topicError: null,
+      topics: [],
     };
-    this.topicStateShow = this.topicStateShow.bind(this);
+    this.fetchSubReddit = this.fetchSubReddit.bind(this);
   }
 
   componentDidUpdate() {
     console.log('__STATE__', this.state);
   }
 
-//Thank you to Said and Kyle
-  redditTopicFetch(searchFormBoard, searchFormLimit) {
-    superagent.get(`${API_URL}/${searchFormBoard}.json?limit=${searchFormLimit}`)
+  fetchSubReddit(subreddit, limit) {
+    superagent.get(`${API_URL}/${subreddit}.json?limit=${limit}`)
     .then(res => {
-      console.log('request success', res.body.data.children.data.url); //that's where our stuff lives
-      this.setState({
-        results: res.body.data.children, //maybe think about what is being returned here, we have to get the children so we can access the stuff on them
-        searchErrorMessage: null,
-      });
-    })
-  .catch(err => {
-    console.error(err);
-    this.setState({
-      results: null,
-      searchErrorMessage:'NOPE',
+      let sorted = res.body.data.children.sort((a, b) => b.data.ups - a.data.ups);
+      this.setState({topics: sorted});
     });
-  });
   }
 
-  render(){
-    return(
-      <section className="application">
-        <h1>Helloooooo</h1>
-        <SearchForm
-        topicSelect = {this.topicStateShow} />
-
-        { this.state.results.length ?
-          <h2>Selected: {this.state.results.length}</h2>
-          : <div>
-          <p>Make a request</p>
-          </div>
-        }
-        </section>
+  render() {
+    return (
+      <section className="app">
+        <SearchForm searchSubReddit={this.fetchSubReddit}/>
+        <SearchResultsList results={this.state.topics}/>
+      </section>
     );
   }
 }
+
+ReactDom.render(<App/>, document.getElementById('root'));
